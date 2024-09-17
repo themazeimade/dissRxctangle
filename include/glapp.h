@@ -1,5 +1,6 @@
 
 #include <memory>
+#include <shader.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -23,6 +24,7 @@ private:
   unsigned int ElementBuffer;
   unsigned int VertexArrayObject;
 
+  std::unique_ptr<Shader> shaders;
   unsigned int vertexShader;
   unsigned int fragmentShader;
   unsigned int shaderProgram;

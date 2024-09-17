@@ -1,6 +1,8 @@
+#include <cmath>
 #include <geometry.h>
 #include <glapp.h>
 #include <iostream>
+#include <memory>
 
 void glapp::initWindow() {
   glfwInit();
@@ -43,9 +45,17 @@ void glapp::glAppStart() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shaderProgram);
+    /*glUseProgram(shaderProgram);*/
+    shaders->use();
+
+    float timeValue = glfwGetTime();
+    float cValue = std::sin(timeValue) / 2.0f + 0.5f;
+    shaders->setFloat("ourValue", cValue);
+    /*int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");*/
+    /*glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);*/
+
     glBindVertexArray(VertexArrayObject);
-    glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     /*glDrawArrays(GL_TRIANGLES, 0, 3);*/
 
@@ -73,14 +83,21 @@ void glapp::initVertexBuffer() {
   glBindVertexArray(VertexArrayObject);
 
   // Vertex Attributes
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+
+  // position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
+  // color attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   // this test vertex (triangle)
-  /*float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};*/
+  /*float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f,
+   * 0.0f};*/
 
-  glBufferData(GL_ARRAY_BUFFER, sizeof(rectangle::vertices),
-               rectangle::vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(rxctangle::vertices),
+               rxctangle::vertices, GL_STATIC_DRAW);
 }
 
 void glapp::initElementBuffer() {
@@ -93,8 +110,8 @@ void glapp::initElementBuffer() {
 
   // this test vertex (triangle)
 
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rectangle::indices),
-               rectangle::indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rxctangle::indices),
+               rxctangle::indices, GL_STATIC_DRAW);
 }
 
 void glapp::initVertexShader() {
@@ -132,9 +149,11 @@ void glapp::initFragmentShader() {
   const char *fragmentShaderSource =
       "#version 330 core\n"
       "out vec4 FragColor;\n"
+      "uniform vec4 ourColor;\n"
       "void main()\n"
       "{\n"
-      "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+      /*"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"*/
+      "   FragColor = ourColor;\n"
       "}\0";
 
   fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -182,7 +201,8 @@ void glapp::deleteShader() {
 
 void glapp::initOpenGL() {
   initBuffers();
-  initVertexShader();
-  initFragmentShader();
-  initShaderProgram();
+  shaders = std::make_unique<Shader>("../shaders/vert.glsl","../shaders/frag.glsl");
+  /*initVertexShader();*/
+  /*initFragmentShader();*/
+  /*initShaderProgram();*/
 }
